@@ -19,7 +19,8 @@ common = []
 
 List = []
 
-texts = ''
+texts_article = ''
+texts_comment = ''
 
 # https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_society&pool=cbox5&_callback=jQuery1124024323657751380678_1616590122616&lang=ko&country=KR&objectId=news008%2C0004562103&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=1&initialize=true&userType=&useAltSort=true&replyPageSize=20&sort=new&includeAllStatus=true&_=1616590122617
 
@@ -54,8 +55,8 @@ def crawling(url):
         #     print(v)
         # for i in len(comment):
         #     print(comment[i].text)
-        global texts
-        texts = texts + article.text
+        global texts_article
+        texts_article = texts_article + article.text
 
         print(article.text)
     else:
@@ -98,7 +99,7 @@ client_id = "6s9vEfhgOSkIWBuO28e_"
 client_secret = "6B_vwqD7eP"
 
 start = 1
-display = 10
+display = 20
 
 s_url = []
 
@@ -171,6 +172,8 @@ for y in range(len(urls)):
 
     rank_json = json.loads(resp[x:z]+'}')
     for w in range(len(rank_json['result']['commentList'])):
+        texts_comment = texts_comment + \
+            rank_json['result']['commentList'][w]['contents']
         print(rank_json['result']['commentList'][w]['contents'])
 
 
@@ -180,13 +183,23 @@ for y in range(len(urls)):
 # print(common[0])
 
 print("**********comments")
-print(texts)
+print(texts_article)
 print("**********frequency")
 
-okt = Okt()
-noun = okt.nouns(texts)
-count = Counter(noun)
+okt1 = Okt()
+okt2 = Okt()
+noun_article = okt1.nouns(texts_article)
+count_article = Counter(noun_article)
 
-noun_list = count.most_common(100)
-for v in noun_list:
+article_list = count_article.most_common(150)
+for v in article_list:
+    print(v)
+
+print("****")
+
+noun_comment = okt2.nouns(texts_comment)
+count_comment = Counter(noun_comment)
+
+comment_list = count_comment.most_common(150)
+for v in comment_list:
     print(v)
