@@ -11,8 +11,8 @@
 # keyword = input('검색 키워드:')
 
 # headers = {
-#     'X-Naver-Client-Id': "6s9vEfhgOSkIWBuO28e_",
-#     'X-Naver-Client-Secret': "6B_vwqD7eP"
+#     'X-Naver-Client-Id': "",
+#     'X-Naver-Client-Secret': ""
 # }
 
 # res = requests.get(url.format(keyword), headers=headers)
@@ -169,8 +169,8 @@ def get_naver_news(url):
         raise Exception("요청 실패 : {}".format(res.status_code))
 
 
-client_id = "6s9vEfhgOSkIWBuO28e_"
-client_secret = "6B_vwqD7eP"
+client_id = ""
+client_secret = ""
 
 start = 1
 display = 3
