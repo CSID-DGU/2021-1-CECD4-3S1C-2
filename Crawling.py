@@ -1,99 +1,6 @@
-# from pprint import pprint
-# from datetime import datetime
-# import time
-# import requests
-# from bs4 import BeautifulSoup
-# import pandas as pd
-# import pickle
-
-# url = "https://openapi.naver.com/v1/search/news.json?query={}"
-
-# keyword = input('검색 키워드:')
-
-# headers = {
-#     'X-Naver-Client-Id': "",
-#     'X-Naver-Client-Secret': ""
-# }
-
-# res = requests.get(url.format(keyword), headers=headers)
-# if res.status_code == 200:
-#     datas = res.json()
-#     print('총 검색 건수 : ', datas['total'])
-#     print(type(datas), type(datas['items']))
-
-#     df = pd.DataFrame(datas['items'])
-#     df.to_csv('naver_{}_검색결과.csv'.format(keyword),
-#               encoding='utf-8', index=False)
-
-
-# def get_naver_news_search(keyword, start=1, display=30):
-#     base_url = "https://openapi.naver.com/v1/search/news.json?query={}&start={}&display={}"
-#     news_links = []
-
-#     while start <= 1000:
-#         url = base_url.format(keyword, start, display)
-#         res = requests.get(url, headers=headers)
-#         if res.status_code == 200:
-#             result = res.json()
-#             items = result['items']
-
-#             for item in items:
-#                 link = item['link']
-#                 if 'news.naver.com' in link:
-#                     news_link.append(link)
-#             start = start + display
-#             time.sleep(0.15)
-#     else:
-#         raise Exception('검색 실패 : {}'.format(res.status_code))
-
-#     curr = datetime.now().strftime('%Y-%m-%d')
-#     filename = '네이버뉴스검색.pkl'.format(keyword, curr)
-#     with open(filename, 'wb') as f:
-#         pickle.dump(news_links, f)
-
-
-# print('error_cnt: {}'.format(error_cnt))
-# df = pd.DataFrame(result, columns=['기사제목', '입력일', '기사내용'])
-# df.to_csv('news_articles.csv', index=False, encoding='utf-8')
-
-
-# crawling(urllib.request.)
-
-
-# def get_naver_news(url):
-#     res = requests.get(url)
-
-#     if(rescode == 200):
-#         #response_body = response.read()
-#         # print(response_body.decode('utf-8'))
-#         soup = BeautifulSoup(res.text)
-#         title = soup.select_one('h3#articleTitle').text.strip()
-#         input_date = soup.select_one('span.t11').text.strip()
-#         article = soup.select_one('div#articleBodyContents').text.strip()
-#         article = article.replace
-
-#         return title, input_date, article
-#     else:
-#         raise Exception("요청 실패 : {}".format(res.status_code))
-
-
-# with open('네이버뉴스검색_오세훈_2021-03-24.pkl', 'rb') as f:
-#     l = pickle.load(f)
-# result = []
-# error_cnt = 0
-# for url in l:
-#     try:
-#         info = get_naver_news(url)
-#         result.append(info)
-#     except:
-#         error_cnt += 1
-
-# print('error_cnt: {}'.format(error_cnt))
-# df = pd.DataFrame(result, columns=['기사제목', '입력일', '기사내용'])
-# df.to_csv('news_articles.csv', index=False, encoding='utf-8')
-
 import os
 import sys
+import re
 import urllib.request
 import requests
 import json
@@ -105,7 +12,16 @@ from bs4 import BeautifulSoup
 from konlpy.tag import Okt
 from collections import Counter
 
+from urllib.request import urlopen, Request
+from fake_useragent import UserAgent
+
 common = []
+
+List = []
+
+texts = ''
+
+# https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_society&pool=cbox5&_callback=jQuery1124024323657751380678_1616590122616&lang=ko&country=KR&objectId=news008%2C0004562103&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=1&initialize=true&userType=&useAltSort=true&replyPageSize=20&sort=new&includeAllStatus=true&_=1616590122617
 
 
 def keyword_extractor(tagger, text):
@@ -123,18 +39,23 @@ def crawling(url):
 
     soup = BeautifulSoup(res.content, 'html.parser')
     article = soup.find('div', attrs={'id': 'articleBodyContents'})
+    # comment = soup.find('span', attrs={'class': 'u_cbox_contents'})
     if article:
         # twit = Twitter()
         # print(keyword_extractor(twit, article.text))
 
-        okt = Okt()
-        noun = okt.nouns(article.text)
-        count = Counter(noun)
+        # okt = Okt()
+        # noun = okt.nouns(article.text)
+        # count = Counter(noun)
 
-        noun_list = count.most_common(100)
-        common.append(noun_list)
-        for v in noun_list:
-            print(v)
+        # noun_list = count.most_common(100)
+        # common.append(noun_list)
+        # for v in noun_list:
+        #     print(v)
+        # for i in len(comment):
+        #     print(comment[i].text)
+        global texts
+        texts = texts + article.text
 
         print(article.text)
     else:
@@ -147,9 +68,13 @@ def crawlings(url):
     res = requests.get(url)
 
     soup = BeautifulSoup(res.text, 'html.parser')
-    article = soup.find('div', attrs={'id': 'articleBodyContents'})
-    print(article.text)
-    return article
+    comment = soup.find_all('span', attrs={'class': 'u_cbox_contents'})
+    if comment:
+        for i in len(comment):
+            print(comment[i].text)
+    else:
+        print("No such tag")
+    return comment
 
 
 def get_naver_news(url):
@@ -169,15 +94,15 @@ def get_naver_news(url):
         raise Exception("요청 실패 : {}".format(res.status_code))
 
 
-client_id = ""
-client_secret = ""
+client_id = "6s9vEfhgOSkIWBuO28e_"
+client_secret = "6B_vwqD7eP"
 
 start = 1
-display = 3
+display = 10
 
 s_url = []
 
-encText = urllib.parse.quote("오세훈")
+encText = urllib.parse.quote("박영선")
 # base_url = "https://openapi.naver.com/v1/search/news.json?query={}&start={}&display={}"
 # url = base_url.format(keyword, start, display)
 base_url = "https://openapi.naver.com/v1/search/news?query={}&start={}&display={}"  # json 결과
@@ -203,41 +128,65 @@ text_data = response_body.decode('utf-8')
 json_data = json.loads(text_data)
 
 for x in json_data['items']:
-    urls.append(x['link'])
+    link = x['link']
+    if 'news.naver.com' in link:
+        urls.append(link)
 print(urls)
+
+oid = []
+aid = []
+page = 1
+headers = []
+comments = []
+com_url = []
+# rank_json = []
+
+for y in range(len(urls)):
+    oid.append(urls[y].split("oid=")[1].split("&")[0])
+    aid.append(urls[y].split("aid=")[1])
+
+useragent = UserAgent()
+
+for v in range(len(urls)):
+    headers.append({
+        'referer': urls[v],
+        'User-Agent': useragent.chrome
+    })
+for x in range(len(urls)):
+    com_url.append("https://apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=news&templateId=default_society&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" + oid[x] + "%2C" + aid[y] + "&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(
+        page) + "&refresh=false&sort=FAVORITE")
+
+for y in range(len(urls)):
+    resp = urlopen(
+        Request(com_url[y], headers=headers[y])).read().decode('utf-8')
+    x = 0
+    while(resp[x] != '{'):
+        x += 1
+    # print(response[x:])
+
+    z = len(resp)-1
+    while(resp[z] != '}'):
+        z -= 1
+    # print(response[x:y]+'}')
+
+    rank_json = json.loads(resp[x:z]+'}')
+    for w in range(len(rank_json['result']['commentList'])):
+        print(rank_json['result']['commentList'][w]['contents'])
 
 
 for y in range(len(urls)):
     crawling(urls[y])
 
-print(common[0])
+# print(common[0])
 
-# for z in range(len(common)):
-#     print(common[z])
+print("**********comments")
+print(texts)
+print("**********frequency")
 
-# for y in urls:
-#     crawling(y)
+okt = Okt()
+noun = okt.nouns(texts)
+count = Counter(noun)
 
-
-# for x in json_data['items']:
-#     result = re.sub('<.+?>', '', x['title'], 0, re.I | re.S)
-#     print(result)
-
-
-# response_body = response.read().decode('utf-8')
-# with open("crawledq.json", 'w') as json_file:
-#     a = json.dump(response_body, json_file)
-
-# with open('crawledq.json', 'rb') as f:
-#     l = json.load(f)
-# result = []
-# error_cnt = 0
-# for url in l:
-#     try:
-#         info = get_naver_news(url)
-#         result.append(info)
-#     except:
-#         error_cnt += 1
-# print('error_cnt: {}'.format(error_cnt))
-# df = pd.DataFrame(result, columns=['기사제목', '입력일', '기사내용'])
-# df.to_csv('news_articles.csv', index=False, encoding='utf-8')
+noun_list = count.most_common(100)
+for v in noun_list:
+    print(v)
