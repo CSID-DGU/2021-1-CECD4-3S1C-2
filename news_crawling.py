@@ -31,11 +31,8 @@ texts_url = []
 
 commentss = ''
 
-# https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_society&pool=cbox5&_callback=jQuery1124024323657751380678_1616590122616&lang=ko&country=KR&objectId=news008%2C0004562103&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=1&initialize=true&userType=&useAltSort=true&replyPageSize=20&sort=new&includeAllStatus=true&_=1616590122617
-
 
 def crawling_url(url):
-    # res = requests.get(url)
     session = HTMLSession()
     res = session.get(url)
 
@@ -55,7 +52,6 @@ def crawling_url(url):
 
 
 def crawling_article(url):
-    # res = requests.get(url)
     session = HTMLSession()
     res = session.get(url)
 
@@ -76,43 +72,6 @@ def crawling_article(url):
 
 crawling_url('https://news.naver.com/main/list.nhn?mode=LSD&mid=sec&sid1=001')
 
-
-client_id = "6s9vEfhgOSkIWBuO28e_"
-client_secret = "6B_vwqD7eP"
-
-start = 1
-display = 1
-
-s_url = []
-
-encText = urllib.parse.quote("오세훈")
-# base_url = "https://openapi.naver.com/v1/search/news.json?query={}&start={}&display={}"
-# url = base_url.format(keyword, start, display)
-base_url = "https://openapi.naver.com/v1/search/news?query={}&start={}&display={}"  # json 결과
-# url = "https://openapi.naver.com/v1/search/blog.xml?query=" + encText # xml 결과
-url = base_url.format(encText, start, display)
-request = urllib.request.Request(url)
-request.add_header("X-Naver-Client-Id", client_id)
-request.add_header("X-Naver-Client-Secret", client_secret)
-response = urllib.request.urlopen(request)
-rescode = response.getcode()
-
-if(rescode == 200):
-    response_body = response.read()
-    # print(response_body.decode('utf-8'))
-else:
-    print("Error Code:" + rescode)
-
-urls = []
-
-text_data = response_body.decode('utf-8')
-json_data = json.loads(text_data)
-
-for x in json_data['items']:
-    link = x['link']
-    if 'news.naver.com' in link:
-        urls.append(link)
-
 print("*********url 정보***********")
 print(texts_url)
 
@@ -122,7 +81,6 @@ page = 1
 headers = []
 comments = []
 com_url = []
-# rank_json = []
 
 for y in range(len(texts_url)):
     oid.append(texts_url[y].split("oid=")[1].split("&")[0])
@@ -157,12 +115,10 @@ for y in range(len(texts_url)):
         texts_comment.append(rank_json['result']['commentList'][w]['contents'])
         commentss = commentss + \
             rank_json['result']['commentList'][w]['contents']
-        # print(rank_json['result']['commentList'][w]['contents'])
 
 for y in range(len(texts_url)):
     crawling_article(texts_url[y])
 
-# print(common[0])
 
 print("**********title************")
 print(texts_title)
@@ -170,18 +126,3 @@ print("**********article**********")
 print(texts_article)
 print("**********comments**********")
 print(texts_comment)
-print("\n\n")
-
-print("*******comment word frequency***********")
-
-# data = pd.DataFrame(texts_comment)
-
-# data.to_csv('news_articles_9.csv'.format(page),
-#             index=False, encoding='utf-8-sig')
-
-# wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
-#                       background_color='white').generate(commentss)
-# plt.figure(figsize=(22, 22))
-# plt.imshow(wordcloud, interpolation='lanczos')
-# plt.axis('off')
-# plt.show()
