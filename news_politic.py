@@ -193,7 +193,7 @@ texts_comment = set(texts_comment)
 print(texts_comment)
 print(len(texts_comment))
 
-# haha
+# haha test
 
 wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
                       background_color='white').generate(str(texts_comment))
