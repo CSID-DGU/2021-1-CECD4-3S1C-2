@@ -45,9 +45,14 @@ def crawling_url(url):
             real_url = r_url[y].find_all('a')
             for z in range(len(real_url)):
                 check = real_url[z]['href']
-                if 'https://news.naver.com' in check:
-                    if 'sid1=100' in check:
-                        texts_url.append(check)
+                if 'sid1=100' in check:
+                    if 'oid=' in check:
+                        if 'news.naver.com' in check:
+                            texts_url.append(check)
+                        else:
+                            temp_url = 'https://news.naver.com'+check
+                            texts_url.append(temp_url)
+
     texts_url = set(texts_url)
     texts_url = list(texts_url)
 
@@ -87,11 +92,15 @@ def crawling_article(url):
 
 # crawling_url('https://news.naver.com/main/list.nhn?mode=LSD&mid=sec&sid1=001')
 crawling_url('https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100')
+for x in range(2, 50):
+    crawling_url(
+        'https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100#&date=%2000:00:00&page={}'.format(x))
 
 
 print("*********url 정보***********")
 print(texts_url)
 print(len(texts_url))
+
 
 oid = []
 aid = []
@@ -138,20 +147,22 @@ for x in range(len(texts_url)):
             # print(response[x:y]+'}')
 
             rank_json = json.loads(resp[x:z]+'}')
-            for w in range(len(rank_json['result']['commentList'])):
-                texts_comment.append(
-                    rank_json['result']['commentList'][w]['contents'])
-                commentss = commentss + \
-                    rank_json['result']['commentList'][w]['contents']
+            if rank_json['result']['commentList']:
+                for w in range(len(rank_json['result']['commentList'])):
+                    texts_comment.append(
+                        rank_json['result']['commentList'][w]['contents'])
+                    commentss = commentss + \
+                        rank_json['result']['commentList'][w]['contents']
 
-for y in range(len(texts_url)):
-    crawling_article(texts_url[y])
+# for y in range(len(texts_url)):
+#     crawling_article(texts_url[y])
 
 
-print("**********title************")
-print(texts_title)
+# print("**********title************")
+# print(texts_title)
 # print("**********article**********")
 # print(texts_article)
 print("**********comments**********")
-print(texts_comment)
+texts_comment = set(texts_comment)
+# print(texts_comment)
 print(len(texts_comment))
