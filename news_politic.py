@@ -48,7 +48,6 @@ def crawling_url(url):
                         texts_url.append(check)
                     else:
                         if '/main/clusterArticles' in check:
-                            print("cluster_haha1")
                             temp_url = 'https://news.naver.com' + check
                             crawling_url_cluster(temp_url)
                         else:
@@ -86,8 +85,8 @@ def crawling_url_cluster(url):
     url = soup.find_all('a', attrs={'class': 'nclicks(cls_pol.clsart1)'})
     if url:
         for x in range(len(url)):
-            texts_url.append(url[x]['href'])
-            print("cluster_haha2")
+            if url[x].text:
+                texts_url.append(url[x]['href'])
     else:
         print("No such tag")
 
