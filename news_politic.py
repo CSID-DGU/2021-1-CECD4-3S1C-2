@@ -114,7 +114,7 @@ def crawling_article(url):
 
 # crawling_url('https://news.naver.com/main/list.nhn?mode=LSD&mid=sec&sid1=001')
 crawling_url('https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100')
-# for x in range(2, 50):
+# for x in range(2, 5):
 #     crawling_url(
 #         'https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100#&date=%2000:00:00&page={}'.format(x))
 
@@ -122,72 +122,82 @@ crawling_url('https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100')
 texts_url = set(texts_url)
 texts_url = list(texts_url)
 
-print("*********url 정보***********")
-print(texts_url)
+# print("*********url 정보***********")
+# print(texts_url)
 print(len(texts_url))
 
 
-# oid = []
-# aid = []
-# page = 1
-# headers = []
-# comments = []
-# com_url = []
+oid = []
+aid = []
+page = 1
+headers = []
+comments = []
+com_url = []
+
+for y in range(len(texts_url)):
+    oid.append(texts_url[y].split("oid=")[1].split("&")[0])
+    aid.append(texts_url[y].split("aid=")[1])
+
+useragent = UserAgent()
+
+for x in range(len(texts_url)):
+    comps_url = []
+    for y in range(1, 2):
+        comps_url.append("https://apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=news&templateId=default_politics&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
+                         oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
+        com_url.append(comps_url)
+
+for v in range(len(texts_url)):
+    headerL = []
+    for z in range(len(com_url)):
+        headerL.append({
+            'referer': texts_url[v],
+            'User-Agent': useragent.chrome
+        })
+        headers.append(headerL)
+
+for x in range(len(texts_url)):
+    for y in range(len(com_url[x])):
+        resp = urlopen(
+            Request(com_url[x][y], headers=headers[x][y])).read().decode('utf-8')
+        if resp:
+            x = 0
+            while(resp[x] != '{'):
+                x += 1
+            # print(response[x:])
+
+            z = len(resp)-1
+            while(resp[z] != '}'):
+                z -= 1
+            # print(response[x:y]+'}')
+
+            rank_json = json.loads(resp[x:z]+'}')
+            if rank_json['result']['commentList']:
+                for w in range(len(rank_json['result']['commentList'])):
+                    texts_comment.append(
+                        rank_json['result']['commentList'][w]['contents'])
+                    # commentss = commentss + \
+                    #     rank_json['result']['commentList'][w]['contents']
 
 # for y in range(len(texts_url)):
-#     oid.append(texts_url[y].split("oid=")[1].split("&")[0])
-#     aid.append(texts_url[y].split("aid=")[1])
-
-# useragent = UserAgent()
-
-# for x in range(len(texts_url)):
-#     comps_url = []
-#     for y in range(1, 10):
-#         comps_url.append("https://apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=news&templateId=default_politics&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
-#                          oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
-#         com_url.append(comps_url)
-
-# for v in range(len(texts_url)):
-#     headerL = []
-#     for z in range(len(com_url)):
-#         headerL.append({
-#             'referer': texts_url[v],
-#             'User-Agent': useragent.chrome
-#         })
-#         headers.append(headerL)
-
-# for x in range(len(texts_url)):
-#     for y in range(len(com_url[x])):
-#         resp = urlopen(
-#             Request(com_url[x][y], headers=headers[x][y])).read().decode('utf-8')
-#         if resp:
-#             x = 0
-#             while(resp[x] != '{'):
-#                 x += 1
-#             # print(response[x:])
-
-#             z = len(resp)-1
-#             while(resp[z] != '}'):
-#                 z -= 1
-#             # print(response[x:y]+'}')
-
-#             rank_json = json.loads(resp[x:z]+'}')
-#             if rank_json['result']['commentList']:
-#                 for w in range(len(rank_json['result']['commentList'])):
-#                     texts_comment.append(
-#                         rank_json['result']['commentList'][w]['contents'])
-#                     commentss = commentss + \
-#                         rank_json['result']['commentList'][w]['contents']
-
-# # for y in range(len(texts_url)):
-# #     crawling_article(texts_url[y])
+#     crawling_article(texts_url[y])
 
 
-# # print("**********title************")
-# # print(texts_title)
-# # print("**********article**********")
-# # print(texts_article)
-# print("**********comments**********")
-# texts_comment = set(texts_comment)
-# # print(texts_comment)
-# print(len(texts_comment))
+# print("**********title************")
+# print(texts_title)
+# print("**********article**********")
+# print(texts_article)
+print("**********comments**********")
+texts_comment = set(texts_comment)
+# print(texts_comment)
+print(texts_comment)
+print(len(texts_comment))
+
+# haha
+
+wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
+                      background_color='white').generate(str(texts_comment))
+plt.figure(figsize=(25, 25))
+plt.imshow(wordcloud, interpolation='lanczos')
+plt.axis('off')
+plt.show()
