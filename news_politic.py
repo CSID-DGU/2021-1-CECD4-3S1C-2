@@ -38,35 +38,58 @@ def crawling_url(url):
     res = session.get(url)
 
     soup = BeautifulSoup(res.content, 'html.parser')
-    url = soup.find_all('ul')
+    url = soup.find_all('a')
     for x in range(len(url)):
-        r_url = url[x].find_all('li')
-        for y in range(len(r_url)):
-            real_url = r_url[y].find_all('a')
-            for z in range(len(real_url)):
-                check = real_url[z]['href']
-                if 'sid1=100' in check:
-                    if 'oid=' in check:
-                        if 'news.naver.com' in check:
-                            texts_url.append(check)
+        if url[x].text:
+            check = url[x]['href']
+            if 'sid1=100' in check:
+                if 'oid=' in check:
+                    if 'news.naver.com' in check:
+                        texts_url.append(check)
+                    else:
+                        if '/main/clusterArticles' in check:
+                            print("cluster_haha1")
+                            temp_url = 'https://news.naver.com' + check
+                            crawling_url_cluster(temp_url)
                         else:
-                            temp_url = 'https://news.naver.com'+check
+                            temp_url = 'https://news.naver.com' + check
                             texts_url.append(temp_url)
+    # url = soup.find_all('ul')
+    # for x in range(len(url)):
+    #     r_url = url[x].find_all('li')
+    #     for y in range(len(r_url)):
+    #         real_url = r_url[y].find_all('a')
+    #         for z in range(len(real_url)):
+    #             check = real_url[z]['href']
+    #             if 'sid1=100' in check:
+    #                 if 'oid=' in check:
+    #                     if 'news.naver.com' in check:
+    #                         texts_url.append(check)
+    #                     else:
+    #                         if '/main/clusterArticles' in check:
+    #                             print("cluster_haha")
+    #                             temp_url = 'https://news.naver.com'+check
+    #                             crawling_url_cluster(temp_url)
+    #                         else:
+    #                             temp_url = 'https://news.naver.com'+check
+    #                             texts_url.append(temp_url)
 
-    texts_url = set(texts_url)
-    texts_url = list(texts_url)
+    return url
 
-    # print("******")
-    # print(texts_url)
-    # print("*******")
-    # if url:
-    #     global texts_url
 
-    #     for x in range(len(url)):
-    #         texts_url.append(url[x]['a']['href'])
+def crawling_url_cluster(url):
+    global texts_url
+    session = HTMLSession()
+    res = session.get(url)
 
-    # else:
-    #     print("No such tag")
+    soup = BeautifulSoup(res.content, 'html.parser')
+    url = soup.find_all('a', attrs={'class': 'nclicks(cls_pol.clsart1)'})
+    if url:
+        for x in range(len(url)):
+            texts_url.append(url[x]['href'])
+            print("cluster_haha2")
+    else:
+        print("No such tag")
 
     return url
 
@@ -92,77 +115,80 @@ def crawling_article(url):
 
 # crawling_url('https://news.naver.com/main/list.nhn?mode=LSD&mid=sec&sid1=001')
 crawling_url('https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100')
-for x in range(2, 50):
-    crawling_url(
-        'https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100#&date=%2000:00:00&page={}'.format(x))
+# for x in range(2, 50):
+#     crawling_url(
+#         'https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100#&date=%2000:00:00&page={}'.format(x))
 
+
+texts_url = set(texts_url)
+texts_url = list(texts_url)
 
 print("*********url 정보***********")
 print(texts_url)
 print(len(texts_url))
 
 
-oid = []
-aid = []
-page = 1
-headers = []
-comments = []
-com_url = []
-
-for y in range(len(texts_url)):
-    oid.append(texts_url[y].split("oid=")[1].split("&")[0])
-    aid.append(texts_url[y].split("aid=")[1])
-
-useragent = UserAgent()
-
-for x in range(len(texts_url)):
-    comps_url = []
-    for y in range(1, 10):
-        comps_url.append("https://apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=news&templateId=default_politics&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
-                         oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
-        com_url.append(comps_url)
-
-for v in range(len(texts_url)):
-    headerL = []
-    for z in range(len(com_url)):
-        headerL.append({
-            'referer': texts_url[v],
-            'User-Agent': useragent.chrome
-        })
-        headers.append(headerL)
-
-for x in range(len(texts_url)):
-    for y in range(len(com_url[x])):
-        resp = urlopen(
-            Request(com_url[x][y], headers=headers[x][y])).read().decode('utf-8')
-        if resp:
-            x = 0
-            while(resp[x] != '{'):
-                x += 1
-            # print(response[x:])
-
-            z = len(resp)-1
-            while(resp[z] != '}'):
-                z -= 1
-            # print(response[x:y]+'}')
-
-            rank_json = json.loads(resp[x:z]+'}')
-            if rank_json['result']['commentList']:
-                for w in range(len(rank_json['result']['commentList'])):
-                    texts_comment.append(
-                        rank_json['result']['commentList'][w]['contents'])
-                    commentss = commentss + \
-                        rank_json['result']['commentList'][w]['contents']
+# oid = []
+# aid = []
+# page = 1
+# headers = []
+# comments = []
+# com_url = []
 
 # for y in range(len(texts_url)):
-#     crawling_article(texts_url[y])
+#     oid.append(texts_url[y].split("oid=")[1].split("&")[0])
+#     aid.append(texts_url[y].split("aid=")[1])
+
+# useragent = UserAgent()
+
+# for x in range(len(texts_url)):
+#     comps_url = []
+#     for y in range(1, 10):
+#         comps_url.append("https://apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=news&templateId=default_politics&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
+#                          oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
+#         com_url.append(comps_url)
+
+# for v in range(len(texts_url)):
+#     headerL = []
+#     for z in range(len(com_url)):
+#         headerL.append({
+#             'referer': texts_url[v],
+#             'User-Agent': useragent.chrome
+#         })
+#         headers.append(headerL)
+
+# for x in range(len(texts_url)):
+#     for y in range(len(com_url[x])):
+#         resp = urlopen(
+#             Request(com_url[x][y], headers=headers[x][y])).read().decode('utf-8')
+#         if resp:
+#             x = 0
+#             while(resp[x] != '{'):
+#                 x += 1
+#             # print(response[x:])
+
+#             z = len(resp)-1
+#             while(resp[z] != '}'):
+#                 z -= 1
+#             # print(response[x:y]+'}')
+
+#             rank_json = json.loads(resp[x:z]+'}')
+#             if rank_json['result']['commentList']:
+#                 for w in range(len(rank_json['result']['commentList'])):
+#                     texts_comment.append(
+#                         rank_json['result']['commentList'][w]['contents'])
+#                     commentss = commentss + \
+#                         rank_json['result']['commentList'][w]['contents']
+
+# # for y in range(len(texts_url)):
+# #     crawling_article(texts_url[y])
 
 
-# print("**********title************")
-# print(texts_title)
-# print("**********article**********")
-# print(texts_article)
-print("**********comments**********")
-texts_comment = set(texts_comment)
-# print(texts_comment)
-print(len(texts_comment))
+# # print("**********title************")
+# # print(texts_title)
+# # print("**********article**********")
+# # print(texts_article)
+# print("**********comments**********")
+# texts_comment = set(texts_comment)
+# # print(texts_comment)
+# print(len(texts_comment))
