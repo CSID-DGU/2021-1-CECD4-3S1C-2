@@ -142,7 +142,7 @@ useragent = UserAgent()
 
 for x in range(len(texts_url)):
     comps_url = []
-    for y in range(1, 2):
+    for y in range(1, 3):
         comps_url.append("https://apis.naver.com/commentBox/cbox/web_neo_list_jsonp.json?ticket=news&templateId=default_politics&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
                          oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=20&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
         com_url.append(comps_url)
@@ -156,10 +156,11 @@ for v in range(len(texts_url)):
         })
         headers.append(headerL)
 
-for x in range(len(texts_url)):
-    for y in range(len(com_url[x])):
+# Header needs to be amended
+for v in range(len(texts_url)):
+    for y in range(len(com_url[v])):
         resp = urlopen(
-            Request(com_url[x][y], headers=headers[x][y])).read().decode('utf-8')
+            Request(com_url[v][y], headers=headers[v][y])).read().decode('utf-8')
         if resp:
             x = 0
             while(resp[x] != '{'):
