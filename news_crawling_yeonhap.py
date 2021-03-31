@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 # from konlpy.tag import Twitter
 from konlpy.tag import Okt
 from collections import Counter
+from collections import OrderedDict
 
 from urllib.request import urlopen, Request
 from fake_useragent import UserAgent
@@ -20,12 +21,19 @@ import pandas as pd
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
+from dateutil.parser import parse
+import csv
+
 common = []
 
 List = []
 
 texts_article = []
-texts_comment = []
+time_zone = []
+for i in range(0, 144):
+    time_zone.append(str(i))
+texts_comment = dict.fromkeys(time_zone, [])
+
 texts_title = []
 texts_url = []
 
@@ -151,7 +159,7 @@ useragent = UserAgent()
 
 for x in range(len(texts_url)):
     comps_url = []
-    for y in range(1, 3):
+    for y in range(1, 15):
         comps_url.append("https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_politics_m1&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
                          oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=100&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
     com_url.append(comps_url)
@@ -169,7 +177,6 @@ for v in range(len(texts_url)):
     #         'User-Agent': useragent.chrome
     #     })
     # headers.append(headerL)
-e = 0
 for v in range(len(texts_url)):
     for y in range(len(com_url[v])):
         # print("v:")
@@ -192,8 +199,17 @@ for v in range(len(texts_url)):
             rank_json = json.loads(resp[x:z]+'}')
             if rank_json['result']['commentList']:
                 for w in range(len(rank_json['result']['commentList'])):
-                    texts_comment.append(
-                        rank_json['result']['commentList'][w]['contents'])
+                    date_str = rank_json['result']['commentList'][w]['modTime']
+                    dt = parse(date_str)
+                    time_str = str(dt.time())
+
+                    time = int(time_str.split(":")[0])
+                    minute = int(time_str.split(":")[1])
+                    key_timezone = int((60*time + minute)/10)
+                    # print(key_timezone)
+
+                    texts_comment[str(key_timezone)] = texts_comment[str(
+                        key_timezone)] + [rank_json['result']['commentList'][w]['contents']]
                     # commentss = commentss + \
                     #     rank_json['result']['commentList'][w]['contents']
 
@@ -205,24 +221,39 @@ for v in range(len(texts_url)):
 # print(texts_title)
 # print("**********article**********")
 # print(texts_article)
+
+# ordered_comment = OrderedDict(texts_comment)
+# print(len(texts_comment['1']))
+# print(len(texts_comment['20']))
+# print(len(texts_comment['30']))
+
+
 print("**********comments**********")
-texts_comment = set(texts_comment)
+# texts_comment = set(texts_comment)
 # print(texts_comment)
-print(texts_comment)
-print(len(texts_comment))
+# print(texts_comment.values())
+# print(len(texts_comment.values()))
 
-data = pd.DataFrame(texts_comment)
+# data = pd.DataFrame.from_dict(
+#     dict([(k, pd.Series(v)) for k, v in ordered_comment.items()]))
 
-data.to_csv('news_articles_10.csv',
-            index=False, encoding='utf-8-sig')
+# data.to_csv('news_articles_17.csv',
+#             index=False, encoding='utf-8-sig')
+
+# with open('news_article_15.csv', 'w', -1, 'utf-8') as f:
+#     w = csv.writer(f)
+#     w.writerow(texts_comment.keys())
+#     w.writerow(texts_comment.values())
+
+
 # data_read = pd.read_csv('news_articles_10.csv', header=None)
 # print(data_read)
 
 # haha test
 
-wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
-                      background_color='white').generate(str(texts_comment))
-plt.figure(figsize=(25, 25))
-plt.imshow(wordcloud, interpolation='lanczos')
-plt.axis('off')
-plt.show()
+# wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
+#                       background_color='white').generate(str(texts_comment.values()))
+# plt.figure(figsize=(25, 25))
+# plt.imshow(wordcloud, interpolation='lanczos')
+# plt.axis('off')
+# plt.show()
