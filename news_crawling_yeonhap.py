@@ -227,12 +227,12 @@ for v in range(len(texts_url)):
                     # commentss = commentss + \
                     #     rank_json['result']['commentList'][w]['contents']
 
-# for y in range(len(texts_url)):
-#     crawling_article(texts_url[y])
+for y in range(len(texts_url)):
+    crawling_article(texts_url[y])
 
 
-# print("**********title************")
-# print(texts_title)
+print("**********title************")
+print(texts_title)
 # print("**********article**********")
 # print(texts_article)
 
@@ -258,3 +258,6 @@ plt.figure(figsize=(25, 25))
 plt.imshow(wordcloud, interpolation='lanczos')
 plt.axis('off')
 plt.show()
+
+# 댓글을 달 수 없는 기사는 크롤링 안됨(url 정보는 크롤링 되나 html코드가 일반 뉴스 코드와는 달라서 기사 본문이나 제목 크롤링 불가)
+# 제목은 필요가 없으면 230~235 line 주석처리
