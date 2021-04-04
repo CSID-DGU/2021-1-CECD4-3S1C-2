@@ -90,11 +90,11 @@ def crawling_url_cluster(url):
     res = session.get(url)
 
     soup = BeautifulSoup(res.content, 'html.parser')
-    url = soup.find_all('a', attrs={'class': 'nclicks(cls_pol.clsart1)'})
-    if url:
-        for x in range(len(url)):
-            if url[x].text:
-                texts_url.append(url[x]['href'])
+    urls = soup.find_all('a', attrs={'class': 'nclicks(cls_pol.clsart1)'})
+    if urls:
+        for x in range(len(urls)):
+            if urls[x].text:
+                texts_url.append(ursl[x]['href'])
     else:
         print("No such tag")
 
