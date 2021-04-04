@@ -8,9 +8,6 @@ import lxml
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup
 
-# from konlpy.tag import Twitter
-from konlpy.tag import Okt
-from collections import Counter
 from collections import OrderedDict
 
 from urllib.request import urlopen, Request
@@ -24,9 +21,7 @@ import matplotlib.pyplot as plt
 from dateutil.parser import parse
 import csv
 
-common = []
-
-List = []
+from datetime import datetime
 
 texts_article = []
 time_zone = []
@@ -44,9 +39,7 @@ def crawling_url(url):
     global texts_url
     session = HTMLSession()
     res = session.get(url)
-# https://news.naver.com/main/read.nhn?mode=LPOD&mid=sec&oid=001&aid=0012295158&isYeonhapFlash=Y&rc=N
-# https://news.naver.com/main/read.nhn?mode=LPOD&mid=sec&oid=001&aid=0012295158&isYeonhapFlash=Y&rc=N
-# https://news.naver.com/main/read.nhn?mode=LSD&mid=shm&sid1=100&oid=586&aid=0000022599
+
     soup = BeautifulSoup(res.content, 'html.parser')
     url = soup.find_all('a')
     for x in range(len(url)):
@@ -56,7 +49,8 @@ def crawling_url(url):
                 if 'oid=' in check:
                     if 'news.naver.com' in check:
                         if 'aid=' in check:
-                            texts_url.append(check)
+                            if 'isYeonhapFlash=Y' in check:
+                                texts_url.append(check)
                     # else:
                     #     if '/main/clusterArticles' in check:
                     #         temp_url = 'https://news.naver.com' + check
@@ -123,17 +117,11 @@ def crawling_article(url):
     return article
 
 
-# crawling_url('https://news.naver.com/main/list.nhn?mode=LSD&mid=sec&sid1=001')
-# crawling_url('https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100')
-crawling_url(
-    'https://news.naver.com/main/list.nhn?mode=LPOD&mid=sec&sid1=001&sid2=140&oid=001&isYeonhapFlash=Y')
-# for x in range(2, 5):
-#     crawling_url('https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date=20210330&page={}'.format(x))
+current_url = datetime.now().strftime('%Y%m%d')
 
-# for x in range(2, 5):
-#     crawling_url(
-#         'https://news.naver.com/main/main.nhn?mode=LSD&mid=shm&sid1=100#&date=%2000:00:00&page={}'.format(x))
-
+for page in range(1, 20):
+    crawling_url(
+        'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page={}'.format(current_url, page))
 
 texts_url = set(texts_url)
 texts_url = list(texts_url)
@@ -147,7 +135,6 @@ oid = []
 aid = []
 page = 1
 headers = []
-comments = []
 com_url = []
 
 for y in range(len(texts_url)):
@@ -163,7 +150,7 @@ for x in range(len(texts_url)):
         comps_url.append("https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_politics_m1&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
                          oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=100&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
     com_url.append(comps_url)
-print(com_url[0][1])
+# print(com_url[0][1])
 
 for v in range(len(texts_url)):
     headers.append({
@@ -222,38 +209,25 @@ for v in range(len(texts_url)):
 # print("**********article**********")
 # print(texts_article)
 
-# ordered_comment = OrderedDict(texts_comment)
-# print(len(texts_comment['1']))
-# print(len(texts_comment['20']))
-# print(len(texts_comment['30']))
-
-
 print("**********comments**********")
-# texts_comment = set(texts_comment)
-# print(texts_comment)
-# print(texts_comment.values())
-# print(len(texts_comment.values()))
 
-# data = pd.DataFrame.from_dict(
-#     dict([(k, pd.Series(v)) for k, v in ordered_comment.items()]))
+data1 = pd.DataFrame({str(0): texts_comment[str(0)]})
+data2 = pd.DataFrame({str(1): texts_comment[str(1)]})
 
-# data.to_csv('news_articles_17.csv',
-#             index=False, encoding='utf-8-sig')
+result = pd.concat([data1, data2], axis=1)
 
-# with open('news_article_15.csv', 'w', -1, 'utf-8') as f:
-#     w = csv.writer(f)
-#     w.writerow(texts_comment.keys())
-#     w.writerow(texts_comment.values())
+for x in range(0, 144):
+    data = pd.DataFrame({str(x): texts_comment[str(x)]})
+    result = pd.concat([result, data], axis=1)
+
+current_csv = datetime.now().strftime('%Y-%m-%d')
+result.to_csv('news_articles_{}.csv'.format(
+    current), index=False, encoding='utf-8-sig')
 
 
-# data_read = pd.read_csv('news_articles_10.csv', header=None)
-# print(data_read)
-
-# haha test
-
-# wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
-#                       background_color='white').generate(str(texts_comment.values()))
-# plt.figure(figsize=(25, 25))
-# plt.imshow(wordcloud, interpolation='lanczos')
-# plt.axis('off')
-# plt.show()
+wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
+                      background_color='white').generate(str(texts_comment.values()))
+plt.figure(figsize=(25, 25))
+plt.imshow(wordcloud, interpolation='lanczos')
+plt.axis('off')
+plt.show()
