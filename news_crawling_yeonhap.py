@@ -32,19 +32,22 @@ texts_comment = dict.fromkeys(time_zone, [])
 texts_title = []
 texts_url = []
 
+page_url = [1]
+
 commentss = ''
 
 
 def crawling_url(url):
     global texts_url
+    global page_url
     session = HTMLSession()
     res = session.get(url)
 
     soup = BeautifulSoup(res.content, 'html.parser')
-    url = soup.find_all('a')
+    urls = soup.find_all('a')
     for x in range(len(url)):
-        if url[x].text:
-            check = url[x]['href']
+        if urls[x].text:
+            check = urls[x]['href']
             if 'mid=sec' in check:
                 if 'oid=' in check:
                     if 'news.naver.com' in check:
@@ -98,6 +101,29 @@ def crawling_url_cluster(url):
     return url
 
 
+def find_Maxpage(url):
+    global page_url
+    session = HTMLSession()
+    res = session.get(url)
+
+    soup = BeautifulSoup(res.content, 'html.parser')
+    urls = soup.find_all('a', attrs={'class': 'nclicks(fls.page)'})
+    if urls:
+        for x in range(len(urls)):
+            check = urls[x].text
+            if check != '다음':
+                if check != '이전':
+                    page_url.append(check)
+            else:
+                next_page = 'https://news.naver.com/main/list.nhn' + \
+                    urls[x]['href']
+                find_Maxpage(next_page)
+    else:
+        print("No such tag")
+
+    return url
+
+
 def crawling_article(url):
     session = HTMLSession()
     res = session.get(url)
@@ -117,11 +143,13 @@ def crawling_article(url):
     return article
 
 
-current_url = datetime.now().strftime('%Y%m%d')
+today = datetime.now().strftime('%Y%m%d')
+find_Maxpage('https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page=1'.format(today))
+print(page_url)
 
-for page in range(1, 20):
+for x in range(len(page_url)):
     crawling_url(
-        'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page={}'.format(current_url, page))
+        'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page={}'.format(today, page_url[x]))
 
 texts_url = set(texts_url)
 texts_url = list(texts_url)
@@ -133,7 +161,6 @@ print(len(texts_url))
 
 oid = []
 aid = []
-page = 1
 headers = []
 com_url = []
 
@@ -146,7 +173,7 @@ useragent = UserAgent()
 
 for x in range(len(texts_url)):
     comps_url = []
-    for y in range(1, 15):
+    for y in range(1, 19):
         comps_url.append("https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_politics_m1&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
                          oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=100&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
     com_url.append(comps_url)
@@ -220,9 +247,9 @@ for x in range(0, 144):
     data = pd.DataFrame({str(x): texts_comment[str(x)]})
     result = pd.concat([result, data], axis=1)
 
-current_csv = datetime.now().strftime('%Y-%m-%d')
-result.to_csv('news_articles_{}.csv'.format(
-    current), index=False, encoding='utf-8-sig')
+current_csv = datetime.now().strftime('%Y%m%d%H%M')
+result.to_csv('news_articles_{}_{}.csv'.format(
+    current_csv, today), index=False, encoding='utf-8-sig')
 
 
 wordcloud = WordCloud(font_path='C:\WINDOWS\FONTS\GULIM.TTC',
