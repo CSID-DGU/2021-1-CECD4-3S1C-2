@@ -81,7 +81,7 @@ def crawling_url(url):
     #                             temp_url = 'https://news.naver.com'+check
     #                             texts_url.append(temp_url)
 
-    return url
+    # return url
 
 
 def crawling_url_cluster(url):
@@ -98,7 +98,7 @@ def crawling_url_cluster(url):
     else:
         print("No such tag")
 
-    return url
+    # return url
 
 
 def find_Maxpage(url):
@@ -121,7 +121,7 @@ def find_Maxpage(url):
     else:
         print("No such tag")
 
-    return url
+    # return url
 
 
 def crawling_article(url):
@@ -140,7 +140,7 @@ def crawling_article(url):
     else:
         print("No such tag")
 
-    return article
+    # return article
 
 
 today = datetime.now().strftime('%Y%m%d')
