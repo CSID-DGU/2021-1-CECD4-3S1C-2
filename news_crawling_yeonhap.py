@@ -151,6 +151,15 @@ for x in range(len(page_url)):
     crawling_url(
         'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page={}'.format(today, page_url[x]))
 
+# today = datetime.now().strftime('%Y%m%d')
+# find_Maxpage('https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date=20210402&page=1')
+# print(page_url)
+
+# for x in range(len(page_url)):
+#     crawling_url(
+#         'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date=20210402&page={}'.format(page_url[x]))
+
+
 texts_url = set(texts_url)
 texts_url = list(texts_url)
 
@@ -199,7 +208,8 @@ for v in range(len(texts_url)):
         # print(y)
         resp = urlopen(
             Request(com_url[v][y], headers=headers[v])).read().decode('utf-8')
-        if resp:
+        # print(resp)
+        if not '"commentList":[]' in resp:
             x = 0
             while(resp[x] != '{'):
                 x += 1
@@ -226,13 +236,23 @@ for v in range(len(texts_url)):
                         key_timezone)] + [rank_json['result']['commentList'][w]['contents']]
                     # commentss = commentss + \
                     #     rank_json['result']['commentList'][w]['contents']
+        else:
+            break
 
-for y in range(len(texts_url)):
-    crawling_article(texts_url[y])
+num_values = []
+
+for x in range(0, 144):
+    num_values.append(len(texts_comment[str(x)]))
+plt.bar(range(0, 144), num_values)
+plt.show()
 
 
-print("**********title************")
-print(texts_title)
+# for y in range(len(texts_url)):
+#     crawling_article(texts_url[y])
+
+
+# print("**********title************")
+# print(texts_title)
 # print("**********article**********")
 # print(texts_article)
 
@@ -260,4 +280,4 @@ plt.axis('off')
 plt.show()
 
 # 댓글을 달 수 없는 기사는 크롤링 안됨(url 정보는 크롤링 되나 html코드가 일반 뉴스 코드와는 달라서 기사 본문이나 제목 크롤링 불가)
-# 제목은 필요가 없으면 230~235 line 주석처리
+# 제목은 필요가 없으면 250~255 line 주석처리
