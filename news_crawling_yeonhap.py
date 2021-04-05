@@ -182,7 +182,7 @@ useragent = UserAgent()
 
 for x in range(len(texts_url)):
     comps_url = []
-    for y in range(1, 19):
+    for y in range(1, 30):
         comps_url.append("https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_politics_m1&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
                          oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=100&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
     com_url.append(comps_url)
