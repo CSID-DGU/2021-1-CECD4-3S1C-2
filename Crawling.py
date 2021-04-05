@@ -99,8 +99,8 @@ def get_naver_news(url):
         raise Exception("요청 실패 : {}".format(res.status_code))
 
 
-client_id = "6s9vEfhgOSkIWBuO28e_"
-client_secret = "6B_vwqD7eP"
+client_id = "Naver API ID"
+client_secret = "Naver API PW"
 
 start = 1
 display = 5
