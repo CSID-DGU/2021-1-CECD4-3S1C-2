@@ -101,13 +101,15 @@ def crawling_url_cluster(url):
     # return url
 
 
-def find_Maxpage(url):
+def find_Maxpage(url, a):
     global page_url
     session = HTMLSession()
     res = session.get(url)
 
     soup = BeautifulSoup(res.content, 'html.parser')
     urls = soup.find_all('a', attrs={'class': 'nclicks(fls.page)'})
+    if a > 0:
+        page_url.append(a*10+1)
     if urls:
         for x in range(len(urls)):
             check = urls[x].text
@@ -115,9 +117,10 @@ def find_Maxpage(url):
                 if check != '이전':
                     page_url.append(check)
             else:
+                a = a+1
                 next_page = 'https://news.naver.com/main/list.nhn' + \
                     urls[x]['href']
-                find_Maxpage(next_page)
+                find_Maxpage(next_page, a)
     else:
         print("No such tag")
 
@@ -144,7 +147,7 @@ def crawling_article(url):
 
 
 today = datetime.now().strftime('%Y%m%d')
-find_Maxpage('https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page=1'.format(today))
+find_Maxpage('https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page=1'.format(today), 0)
 print(page_url)
 
 for x in range(len(page_url)):
@@ -152,12 +155,12 @@ for x in range(len(page_url)):
         'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date={}&page={}'.format(today, page_url[x]))
 
 # today = datetime.now().strftime('%Y%m%d')
-# find_Maxpage('https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date=20210402&page=1')
+# find_Maxpage('https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date=20210406&page=1', 0)
 # print(page_url)
 
 # for x in range(len(page_url)):
 #     crawling_url(
-#         'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date=20210402&page={}'.format(page_url[x]))
+#         'https://news.naver.com/main/list.nhn?mode=LPOD&sid2=140&sid1=001&mid=sec&oid=001&isYeonhapFlash=Y&date=20210406&page={}'.format(page_url[x]))
 
 
 texts_url = set(texts_url)
