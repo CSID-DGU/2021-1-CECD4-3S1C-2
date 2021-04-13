@@ -22,6 +22,10 @@ from dateutil.parser import parse
 import csv
 
 from datetime import datetime
+import time
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 texts_article = []
 time_zone = []
@@ -35,6 +39,8 @@ texts_url = []
 page_url = [1]
 
 commentss = ''
+male = 0
+female = 0
 
 
 def crawling_url(url):
@@ -45,7 +51,7 @@ def crawling_url(url):
 
     soup = BeautifulSoup(res.content, 'html.parser')
     urls = soup.find_all('a')
-    for x in range(len(url)):
+    for x in range(len(urls)):
         if urls[x].text:
             check = urls[x]['href']
             if 'mid=sec' in check:
@@ -54,13 +60,14 @@ def crawling_url(url):
                         if 'aid=' in check:
                             if 'isYeonhapFlash=Y' in check:
                                 texts_url.append(check)
-                    # else:
-                    #     if '/main/clusterArticles' in check:
-                    #         temp_url = 'https://news.naver.com' + check
-                    #         crawling_url_cluster(temp_url)
-                    #     else:
-                    #         temp_url = 'https://news.naver.com' + check
-                    #         texts_url.append(temp_url)
+    time.sleep(0.5)
+    # else:
+    #     if '/main/clusterArticles' in check:
+    #         temp_url = 'https://news.naver.com' + check
+    #         crawling_url_cluster(temp_url)
+    #     else:
+    #         temp_url = 'https://news.naver.com' + check
+    #         texts_url.append(temp_url)
     # url = soup.find_all('ul')
     # for x in range(len(url)):
     #     r_url = url[x].find_all('li')
@@ -123,6 +130,7 @@ def find_Maxpage(url, a):
                 find_Maxpage(next_page, a)
     else:
         print("No such tag")
+    time.sleep(0.5)
 
     # return url
 
@@ -144,6 +152,22 @@ def crawling_article(url):
         print("No such tag")
 
     # return article
+
+
+def getJson_NewsInfo(resp):
+    x = 0
+    while(resp[x] != '{'):
+        x += 1
+     # print(response[x:])
+
+    z = len(resp)-1
+    while(resp[z] != '}'):
+        z -= 1
+    # print(response[x:y]+'}')
+
+    rank_json = json.loads(resp[x:z]+'}')
+
+    return rank_json
 
 
 today = datetime.now().strftime('%Y%m%d')
@@ -187,7 +211,7 @@ for x in range(len(texts_url)):
     comps_url = []
     for y in range(1, 30):
         comps_url.append("https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json?ticket=news&templateId=default_politics_m1&pool=cbox5&_callback=jQuery1707138182064460843_1523512042464&lang=ko&country=&objectId=news" +
-                         oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=100&indexSize=10&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
+                         oid[x] + "%2C" + aid[x] + "&categoryId=&pageSize=100&indexSize=100&groupId=&listType=OBJECT&pageType=more&page=" + str(y) + "&refresh=false&sort=FAVORITE")
     com_url.append(comps_url)
 # print(com_url[0][1])
 
@@ -203,6 +227,9 @@ for v in range(len(texts_url)):
     #         'User-Agent': useragent.chrome
     #     })
     # headers.append(headerL)
+
+spam_Num = 0
+
 for v in range(len(texts_url)):
     for y in range(len(com_url[v])):
         # print("v:")
@@ -212,27 +239,17 @@ for v in range(len(texts_url)):
         resp = urlopen(
             Request(com_url[v][y], headers=headers[v])).read().decode('utf-8')
         # print(resp)
+        time.sleep(0.15)
         if not '"commentList":[]' in resp:
-            x = 0
-            while(resp[x] != '{'):
-                x += 1
-            # print(response[x:])
-
-            z = len(resp)-1
-            while(resp[z] != '}'):
-                z -= 1
-            # print(response[x:y]+'}')
-
-            rank_json = json.loads(resp[x:z]+'}')
+            rank_json = getJson_NewsInfo(resp)
             if rank_json['result']['commentList']:
                 for w in range(len(rank_json['result']['commentList'])):
                     date_str = rank_json['result']['commentList'][w]['modTime']
                     dt = parse(date_str)
                     time_str = str(dt.time())
-
-                    time = int(time_str.split(":")[0])
+                    times = int(time_str.split(":")[0])
                     minute = int(time_str.split(":")[1])
-                    key_timezone = int((60*time + minute)/10)
+                    key_timezone = int((60*times + minute)/10)
                     # print(key_timezone)
 
                     texts_comment[str(key_timezone)] = texts_comment[str(
@@ -248,6 +265,19 @@ for x in range(0, 144):
     num_values.append(len(texts_comment[str(x)]))
 plt.bar(range(0, 144), num_values)
 plt.show()
+
+# print(male)
+# print(female)
+
+# ratio = []
+# male_percent = (male/(male+female))*100
+# female_percent = (female/(male+female))*100
+# ratio.append(male_percent)
+# ratio.append(female_percent)
+# labels = ['Male', 'Female']
+
+# plt.pie(ratio, labels=labels, autopct='%.1f%%')
+# plt.show()
 
 
 # for y in range(len(texts_url)):
