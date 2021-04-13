@@ -38,7 +38,7 @@ options = Options()
 options.add_argument('headless')
 options.add_argument(f'user-agent={userAgents}')
 driver = webdriver.Chrome(
-    options=options, executable_path=r'C:\Users\Jumin\Desktop\chromedriver_win32\chromedriver.exe')
+    options=options, executable_path=r'크롬 드라이버 절대경로')
 # 봇탐지 우회
 
 
@@ -330,14 +330,39 @@ plt.show()
 print(male)
 print(female)
 
-ratio = []
+ratio_gender = []
 male_percent = (male/(male+female))*100
 female_percent = (female/(male+female))*100
-ratio.append(male_percent)
-ratio.append(female_percent)
-labels = ['Male', 'Female']
+ratio_gender.append(male_percent)
+ratio_gender.append(female_percent)
+labels_gender = ['Male', 'Female']
 
-plt.pie(ratio, labels=labels, autopct='%.1f%%')
+plt.pie(ratio_gender, labels=labels_gender, autopct='%.1f%%')
+plt.show()
+
+ratio_age = []
+tens_percent = (tens/(tens+twenties+thirties+fourties+fifties+sixties))*100
+twenties_percent = (twenties/(tens+twenties+thirties +
+                    fourties+fifties+sixties))*100
+thirties_percent = (thirties/(tens+twenties+thirties +
+                    fourties+fifties+sixties))*100
+fourties_percent = (fourties/(tens+twenties+thirties +
+                    fourties+fifties+sixties))*100
+fifties_percent = (fifties/(tens+twenties+thirties +
+                   fourties+fifties+sixties))*100
+sixties_percent = (sixties/(tens+twenties+thirties +
+                   fourties+fifties+sixties))*100
+
+ratio_age.append(tens_percent)
+ratio_age.append(twenties_percent)
+ratio_age.append(thirties_percent)
+ratio_age.append(fourties_percent)
+ratio_age.append(fifties_percent)
+ratio_age.append(sixties_percent)
+
+labels_age = ['Tens', 'Twenties', 'Thirties', 'Fourties', 'Fifties', 'Sixties']
+
+plt.pie(ratio_age, labels=labels_age, autopct='%.1f%%')
 plt.show()
 
 
