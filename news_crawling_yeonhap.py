@@ -27,6 +27,26 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+#######
+options = webdriver.ChromeOptions()
+# options.add_argument('headless')
+
+ua = UserAgent(verify_ssl=False)
+userAgents = ua.random
+
+options = Options()
+options.add_argument('headless')
+options.add_argument(f'user-agent={userAgents}')
+driver = webdriver.Chrome(
+    options=options, executable_path=r'C:\Users\Jumin\Desktop\chromedriver_win32\chromedriver.exe')
+# 봇탐지 우회
+
+
+# 암묵적으로 웹 자원 로드를 위해 3초까지 기다려 준다.
+driver.implicitly_wait(3)
+time.sleep(3)
+
+
 texts_article = []
 time_zone = []
 for i in range(0, 144):
@@ -39,8 +59,6 @@ texts_url = []
 page_url = [1]
 
 commentss = ''
-male = 0
-female = 0
 
 
 def crawling_url(url):
@@ -60,7 +78,7 @@ def crawling_url(url):
                         if 'aid=' in check:
                             if 'isYeonhapFlash=Y' in check:
                                 texts_url.append(check)
-    time.sleep(0.5)
+    # time.sleep(0.5)
     # else:
     #     if '/main/clusterArticles' in check:
     #         temp_url = 'https://news.naver.com' + check
@@ -130,7 +148,7 @@ def find_Maxpage(url, a):
                 find_Maxpage(next_page, a)
     else:
         print("No such tag")
-    time.sleep(0.5)
+    # time.sleep(0.5)
 
     # return url
 
@@ -228,7 +246,15 @@ for v in range(len(texts_url)):
     #     })
     # headers.append(headerL)
 
-spam_Num = 0
+total_comments = 0
+male = 0
+female = 0
+tens = 0
+twenties = 0
+thirties = 0
+fourties = 0
+fifties = 0
+sixties = 0
 
 for v in range(len(texts_url)):
     for y in range(len(com_url[v])):
@@ -239,9 +265,44 @@ for v in range(len(texts_url)):
         resp = urlopen(
             Request(com_url[v][y], headers=headers[v])).read().decode('utf-8')
         # print(resp)
-        time.sleep(0.15)
+        # time.sleep(0.15)
         if not '"commentList":[]' in resp:
             rank_json = getJson_NewsInfo(resp)
+
+            if y == 0:
+                total = rank_json['result']['count']['comment']
+                total_comments = total_comments + total
+                driver.get(texts_url[v])
+                figures = driver.find_elements_by_class_name(
+                    "u_cbox_chart_per")
+                if figures:
+                    for t in range(len(figures)):
+                        statics = figures[t].text
+                        if t == 0:
+                            male = male + total * \
+                                (int(statics.split("%")[0])/100)
+                        if t == 1:
+                            female = female + total * \
+                                (int(statics.split("%")[0])/100)
+                        if t == 2:
+                            tens = tens + total * \
+                                (int(statics.split("%")[0])/100)
+                        if t == 3:
+                            twenties = twenties + total * \
+                                (int(statics.split("%")[0])/100)
+                        if t == 4:
+                            thirties = thirties + total * \
+                                (int(statics.split("%")[0])/100)
+                        if t == 5:
+                            fourties = fourties + total * \
+                                (int(statics.split("%")[0])/100)
+                        if t == 6:
+                            fifties = fifties + total * \
+                                (int(statics.split("%")[0])/100)
+                        if t == 7:
+                            sixties = sixties + total * \
+                                (int(statics.split("%")[0])/100)
+
             if rank_json['result']['commentList']:
                 for w in range(len(rank_json['result']['commentList'])):
                     date_str = rank_json['result']['commentList'][w]['modTime']
@@ -266,18 +327,18 @@ for x in range(0, 144):
 plt.bar(range(0, 144), num_values)
 plt.show()
 
-# print(male)
-# print(female)
+print(male)
+print(female)
 
-# ratio = []
-# male_percent = (male/(male+female))*100
-# female_percent = (female/(male+female))*100
-# ratio.append(male_percent)
-# ratio.append(female_percent)
-# labels = ['Male', 'Female']
+ratio = []
+male_percent = (male/(male+female))*100
+female_percent = (female/(male+female))*100
+ratio.append(male_percent)
+ratio.append(female_percent)
+labels = ['Male', 'Female']
 
-# plt.pie(ratio, labels=labels, autopct='%.1f%%')
-# plt.show()
+plt.pie(ratio, labels=labels, autopct='%.1f%%')
+plt.show()
 
 
 # for y in range(len(texts_url)):
