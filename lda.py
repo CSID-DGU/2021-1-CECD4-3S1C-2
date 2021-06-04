@@ -51,6 +51,7 @@ okt = Okt()
 title_topic = []
 detokenized_doc = []
 
+# * Topic Extraction Process
 for i in range(len(titles)):
     nouns = okt.nouns(str(titles[i]))
     print(nouns)
