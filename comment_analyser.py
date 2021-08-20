@@ -1,30 +1,18 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import re
-import urllib.request
 from konlpy.tag import Okt
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.layers import Embedding, Dense, LSTM
-from tensorflow.keras.models import Sequential
 from tensorflow.keras.models import load_model
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
-import pickle 
-
+import json
 
 stopwords = ['의','가','이','은','들','는','좀','잘','걍','과','도','를','으로','자','에','와','한','하다']
 okt=Okt()
 
+
 max_len = 30
 max_words = 10000
-
 tokenizer = Tokenizer(num_words=max_words)
 
-
-import json
-
-with open('wordIndex.json') as json_file:
+with open('word_index.json') as json_file:
   word_index = json.load(json_file)
   tokenizer.word_index = word_index
   print('%s개의 고유한 토큰을 찾았습니다.' % len(word_index))
@@ -62,6 +50,6 @@ def sentiment_predict(new_sentence):
 
 sentiment_predict('백신 못맞는게 말이되냐? ') #부정 예측 
 
-sentiment_predict('문재인 정치 진짜 못하네') #부정 예측
+sentiment_predict('xxx 정치 진짜 못하네') #부정 예측
 
-sentiment_predict('문재인 짱') #긍정 예측
+sentiment_predict('xxx 짱') #긍정 예측
