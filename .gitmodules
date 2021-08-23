@@ -1,0 +1,3 @@
+[submodule "3S1C_frontend"]
+	path = 3S1C_frontend
+	url = https://github.com/CSID-DGU/3S1C_frontend
