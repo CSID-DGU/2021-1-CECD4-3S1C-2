@@ -1,0 +1,4 @@
+delete from Comments;
+delete from AgeAnalysis;
+delete from GenderAnalysis;
+delete from News;
