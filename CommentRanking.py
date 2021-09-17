@@ -1,10 +1,15 @@
 from konlpy.tag import Okt
 from collections import Counter
 
+def getKeyword():
+    keyword=[i[0] for i in noun_list] 
+    return keyword
+
 #파일 경로 설정
-filename = 'comment_collection.csv'
+filename = 'test.csv'
 f= open(filename,'r',encoding='utf-8')
 news = f.read()
+
 
 #댓글 중 명사만 추출
 okt=Okt()
@@ -19,5 +24,3 @@ count = Counter(noun)
 f.close()
 
 noun_list = count.most_common(10) #most_common() : 매개변수 개수만큼 등수 추출
-for list in noun_list:
-    print(list)
