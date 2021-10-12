@@ -46,7 +46,7 @@ class saveDB:
                 pos= round(value,2)
                 neg= 100-pos
                 print(neg)
-            sql="""update KEYWORDS (positive, negative) values (%s, %s)"""
+            sql="""update keywords (positive, negative) values (%s, %s)"""
             self.cursor.execute(sql, (pos, neg))
             self.db.commit()
 
