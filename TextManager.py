@@ -6,6 +6,9 @@ from ckonlpy.utils import load_ngram
 from pykospacing import Spacing
 from collections import Counter
 
+from DBManager import LoadDB
+
+
 
 class TextManager:
 
@@ -17,30 +20,25 @@ class TextManager:
         self.LoadDict('./CustomWord.txt') #단어 사전 로드
         self.keywordList=[] #상위 키워드 리스트
 
-    def Processing(self,filename): #후처리 함수
+    def Processing(self,data): #후처리 함수
         self.postprocessor = Postprocessor(self.twitter,replace =self.replace,ngrams=self.ngrams)
-        f= open(filename,'r',encoding='utf-8')
-        file = f.readlines()
         result=[]
-        for sentence in file:
+        for sentence in data:
             sentence=self.spacing(sentence)
             line=''
             for word in self.postprocessor.pos(sentence): #문장 후처리
                 line=line+word[0]
-                line=self.spacing(line) #단어 띄어쓰기 처리
+            line=self.spacing(line) #단어 띄어쓰기 처리
             result.append(line)
         return result
 
-    def ExtractKeyword(self,number,filename): #키워드 추출 
+    def ExtractKeyword(self,data,size): #키워드 추출 
         passtags={'Noun'}
         stopwords = load_wordset('./stopwords.txt')
         self.postprocessor = Postprocessor(self.twitter,stopwords=stopwords,passtags=passtags,replace =self.replace,ngrams=self.ngrams)
 
-        f= open(filename,'r',encoding='utf-8')
-        file = f.readlines()
-
         result=[]
-        for sentence in file:
+        for sentence in data:
             sentence=self.spacing(sentence)
             temp=self.postprocessor.pos(sentence)
             for word in temp:
@@ -48,8 +46,8 @@ class TextManager:
                     result.append(word[0])
 
         count = Counter(result)
-        result = count.most_common(number) #most_common() : 매개변수 개수만큼 등수 추출
-        return result
+        self.keywordList = count.most_common(size) #most_common() : 매개변수 개수만큼 등수 추출
+        return self.keywordList
     
     def pos(self,sentence):
         print(self.twitter.pos(sentence))
@@ -65,8 +63,8 @@ class TextManager:
             word=word.strip('\n')
             self.twitter.add_dictionary(word, 'Noun')
 
-    def ExtractComments(self,keywords,file): #키워드가 포함된 문장 추출
-        comments=self.Processing(file)
+    def ExtractComments(self,keywords,data): #키워드가 포함된 문장 추출
+        comments=self.Processing(data)
         result=[]
         for i in keywords:
             line=[]
@@ -78,13 +76,9 @@ class TextManager:
                     result[index].append(target)
         return result
 
-'''
-text=TextManager('./test2.csv')
-temp=text.ExtractKeyword(2)
-keywords=[]
-for i in temp:
-    keywords.append(i[0])
-text.ExtractComments(keywords,'./test2.csv')
-#print(text.ExtractKeyword(5))
-#print(text.Processing())
-'''
+
+#text=TextManager()
+#ldb=LoadDB()
+#data=ldb.FetchData()
+#keyword=text.ExtractKeyword(data,10)
+#print(keyword)

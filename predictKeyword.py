@@ -1,18 +1,20 @@
 import comment_model_simple as model 
 from TextManager import TextManager
-from SaveDB import saveDB
+from DBManager import saveDB
+from DBManager import LoadDB
 
 filename='./test.csv'
 text=TextManager()
-db=saveDB()
-keywordList=text.ExtractKeyword(filename,10)
+Ldb=LoadDB()
+data=Ldb.FetchData()
+keywordList=text.ExtractKeyword(data,10)
 keyword=[]
 for i in keywordList:
     keyword.append(i[0])
-commentList=text.ExtractComments(keyword,filename)
+commentList=text.ExtractComments(keyword,data)
 
-filename2='./result.txt'
-f= open(filename2,'w')
+filename='./debug.txt'
+f= open(filename,'w')
 valueList=[]
 for line in commentList:
     score=0
@@ -30,4 +32,5 @@ for line in commentList:
         print(line[0],'부정 키워드입니다.',score)
 
 f.close()
-db.saveDB(keywordList,valueList)
+Sdb=saveDB()
+Sdb.saveDB(keywordList,valueList)

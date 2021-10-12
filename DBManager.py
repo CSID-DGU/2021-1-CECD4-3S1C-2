@@ -1,5 +1,4 @@
 import pymysql
-from TextManager import TextManager
 
 class saveDB:
     def __init__(self):
@@ -51,9 +50,43 @@ class saveDB:
             self.cursor.execute(sql, (pos, neg))
             self.db.commit()
 
-#tx=TextManager()
+class LoadDB():
+    def __init__(self):
+        self.db=pymysql.connect(
+            host="3.35.115.140",
+            port=3306,
+            user="root",
+            passwd="1234",
+            database="news",
+            charset="utf8"
+        )
+        self.cursor=self.db.cursor()
+    
+    def FetchData(self):
+        sql="SELECT contents FROM comments" #select 할 테이블 이름
+        self.cursor.execute(sql)
+        self.db.commit()
+        temp=self.cursor.fetchall()
+        data=[]
+        for target in temp:
+            target=str(target)
+            target=target.rstrip(')')
+            target=target.rstrip(',')
+            target=target.rstrip("'")
+            target=target.lstrip('(')
+            target=target.lstrip("'")
+            target=target.replace('\\n','')
+            data.append(target)
+        return data
+
+
+#==DB Save==        
 #db=saveDB()
 #keyword=tx.ExtractKeyword('./test.csv',10)
 #db.initDB()
 #db.saveKeywordDB(keyword)
 #db.savePredictDB(valueList)
+
+#==DB Load==
+#Ldb=LoadDB()
+#data=Ldb.FetchData()
