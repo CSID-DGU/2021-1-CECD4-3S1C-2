@@ -5,8 +5,7 @@ from ckonlpy.utils import load_wordset
 from ckonlpy.utils import load_ngram
 from pykospacing import Spacing
 from collections import Counter
-
-from DBManager import LoadDB
+from News import News
 
 
 
@@ -18,7 +17,6 @@ class TextManager:
         self.replace=load_replace_wordpair('./replacewords.txt') #단어 치환
         self.ngrams=load_ngram('./ngrams.txt') #ngram 단어 (띄어쓰기 복합명사)
         self.LoadDict('./CustomWord.txt') #단어 사전 로드
-        self.keywordList=[] #상위 키워드 리스트
 
     def Processing(self,data): #후처리 함수
         self.postprocessor = Postprocessor(self.twitter,replace =self.replace,ngrams=self.ngrams)
@@ -46,11 +44,16 @@ class TextManager:
                     result.append(word[0])
 
         count = Counter(result)
-        self.keywordList = count.most_common(size) #most_common() : 매개변수 개수만큼 등수 추출
-        return self.keywordList
+        result = count.most_common(size) #most_common() : 매개변수 개수만큼 등수 추출
+        return result
     
     def pos(self,sentence):
-        print(self.twitter.pos(sentence))
+        result=[]
+        temp=self.postprocessor.pos(sentence)
+        for word in temp:
+            if len(word[0]) > 1:
+                result.append(word[0])
+        return result
 
 
     def AddWord(self,word): #사용자 지정 단어 추가
@@ -63,22 +66,31 @@ class TextManager:
             word=word.strip('\n')
             self.twitter.add_dictionary(word, 'Noun')
 
-    def ExtractComments(self,keywords,data): #키워드가 포함된 문장 추출
-        comments=self.Processing(data)
+    def ExtractComments(self,keywordList,data): #키워드가 포함된 문장 추출
         result=[]
-        for i in keywords:
+        comments=self.Processing(data)
+        for i in range(0,len(keywordList)):
             line=[]
-            line.append(i)
             result.append(line)
         for target in comments:
-            for index in range(0,len(keywords)):
-                if keywords[index] in target:
+            for index in range(0,len(keywordList)):
+                if keywordList[index][0] in target:
                     result[index].append(target)
         return result
 
+    def ExtractRelKeyword(self,news,size):
+        keywordList=news.getKeywordList()
+        result=[]
+        for i in range(0,len(keywordList)):
+            commentLine=news.getCommentLine(i)
+            result.append(self.ExtractKeyword(commentLine,size))
+        return result
 
-#text=TextManager()
-#ldb=LoadDB()
-#data=ldb.FetchData()
-#keyword=text.ExtractKeyword(data,10)
-#print(keyword)
+    def PrintValue(self):
+        for i in range(0,len(self.keywordList)):
+            if self.valueList[i] >0.4:
+                print(self.keywordList[i][0],'긍정 키워드입니다.',self.valueList[i])
+            elif self.valueList[i] >= 0.30103:
+                print(self.keywordList[i][0],'중립 키워드입니다.',self.valueList[i])
+            else:
+                print(self.keywordList[i][0],'부정 키워드입니다.',self.valueList[i])

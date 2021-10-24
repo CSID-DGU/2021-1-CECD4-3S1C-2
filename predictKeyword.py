@@ -1,36 +1,30 @@
+from News import News
 import comment_model_simple as model 
 from TextManager import TextManager
-from DBManager import saveDB
-from DBManager import LoadDB
+from DBManager import KeywordDB
 
-filename='./test.csv'
+
 text=TextManager()
-Ldb=LoadDB()
-data=Ldb.FetchData()
-keywordList=text.ExtractKeyword(data,10)
-keyword=[]
-for i in keywordList:
-    keyword.append(i[0])
-commentList=text.ExtractComments(keyword,data)
+db=KeywordDB()
+news=News()
+# for id in idList:
+id=3 #분석할 뉴스 아이디
+size=10 #분석할 키워드 개수
 
-filename='./debug.txt'
-f= open(filename,'w')
-valueList=[]
-for line in commentList:
+
+news.setId(id)
+data=db.FetchData(id)
+news.setKeywordList(text.ExtractKeyword(data,size)) 
+news.setCommentList(text.ExtractComments(news.getKeywordList(),data)) 
+news.setRelList(text.ExtractRelKeyword(news,10)) 
+
+
+for line in news.getCommentList():
     score=0
-    for i in range(1,len(line)):
-        predict=model.sentiment_predict(line[i])
-        f.write(str(predict)+'\n')
+    for comment in line:
+        predict=model.sentiment_predict(comment)
         score=score+predict
     score=score/len(line)
-    valueList.append(score)
-    if score >0.4:
-        print(line[0],'긍정 키워드입니다.',score)
-    elif score >= 0.30103:
-        print(line[0],'중립 키워드입니다.',score)
-    else:
-        print(line[0],'부정 키워드입니다.',score)
+    news.setValueList(score)
 
-f.close()
-Sdb=saveDB()
-Sdb.saveDB(keywordList,valueList)
+db.saveDB(news) # 저장
