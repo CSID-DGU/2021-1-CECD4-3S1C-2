@@ -1,33 +1,31 @@
-from os import fdopen
+from News import News
 import comment_model_simple as model 
 from TextManager import TextManager
+from DBManager import KeywordDB
+from DBManager import RelDB
 
-filename='./test.csv'
+
 text=TextManager()
-temp=text.ExtractKeyword(10,filename)
-keyword=[]
-for i in temp:
-    keyword.append(i[0])
+db=KeywordDB()
+reldb=RelDB()
+news=News()
 
-print(keyword)
-commentList=text.ExtractComments(keyword,filename)
+size=30 #분석할 키워드 개수
+relsize=30 #분석할 연관 키워드 개수
 
-filename2='./result.txt'
-f= open(filename2,'w')
+data=db.FetchData()
+news.setKeywordList(text.ExtractKeyword(data,size)) 
+news.setCommentList(text.ExtractComments(news.getKeywordList(),data)) 
+news.setRelList(text.ExtractRelKeyword(news,relsize)) 
 
-for line in commentList:
+
+for line in news.getCommentList():
     score=0
-    for i in range(1,len(line)):
-        predict=model.sentiment_predict(line[i])
-        f.write(str(predict)+'\n')
+    for comment in line:
+        predict=model.sentiment_predict(comment)
         score=score+predict
     score=score/len(line)
+    news.setValueList(score)
 
-    if score >0.4:
-        print(line[0],'긍정 키워드입니다.',score)
-    elif score >= 0.30103:
-        print(line[0],'중립 키워드입니다.',score)
-    else:
-        print(line[0],'부정 키워드입니다.',score)
-
-f.close()
+db.saveDB(news) # 저장
+reldb.saveDB(news) #연관 키워드 저장
