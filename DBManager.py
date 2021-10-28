@@ -35,7 +35,7 @@ class KeywordDB(DB):
             self.db.commit()
     
     def FetchData(self):
-        sql="SELECT contents FROM comments" #select 할 테이블 이름
+        sql="SELECT contents FROM comments" 
         self.cursor.execute(sql)
         self.db.commit()
         temp=self.cursor.fetchall()
@@ -54,13 +54,12 @@ class KeywordDB(DB):
 class RelDB(DB):
     def saveDB(self,news):
         keywordList= news.getKeywordList()
-        contentList=news.getRelList()
-        for keywords in keywordList:
-            keyword=keywords[0]
-            for contents in contentList:
-                for temp in contents:
-                    content=temp[0]
-                    mentions=temp[1]
-                    sql="REPLACE INTO relkeywords (content, keyword, mentions) values (%s, %s, %s)"
-                    self.cursor.execute(sql, (content, keyword, mentions))
-                    self.db.commit()
+        relKeywordList=news.getRelList()
+        for i in range(0,len(keywordList)):
+            keyword=keywordList[i][0]
+            relkeyword=relKeywordList[i]
+            for j in range(0,len(relkeyword)):
+                tuple=(*relkeyword[j],keyword)
+                sql="REPLACE INTO relkeywords (content, mentions, keyword) values (%s, %s, %s)"
+                self.cursor.execute(sql, tuple)
+                self.db.commit()

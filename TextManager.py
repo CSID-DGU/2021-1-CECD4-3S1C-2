@@ -79,12 +79,27 @@ class TextManager:
         return result
 
     def ExtractRelKeyword(self,news,size):
+        passtags={'Noun'}
+        stopwords = load_wordset('./stopwords.txt')
+        self.postprocessor = Postprocessor(self.twitter,stopwords=stopwords,passtags=passtags,replace =self.replace,ngrams=self.ngrams)
         keywordList=news.getKeywordList()
         result=[]
         for i in range(0,len(keywordList)):
             commentLine=news.getCommentLine(i)
-            result.append(self.ExtractKeyword(commentLine,size))
+            lineresult=[]
+            for sentence in commentLine:
+                sentence=self.spacing(sentence)
+                temp=self.postprocessor.pos(sentence)
+                for word in temp:
+                    if len(word[0]) > 1 and word[0] != keywordList[i]:
+                        lineresult.append(word[0])
+
+            count = Counter(lineresult)
+            lineresult = count.most_common(size) #most_common() : 매개변수 개수만큼 등수 추출
+            result.append(lineresult)
         return result
+
+
 
     def PrintValue(self):
         for i in range(0,len(self.keywordList)):
