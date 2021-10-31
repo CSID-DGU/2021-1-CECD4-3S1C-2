@@ -98,14 +98,3 @@ class TextManager:
             lineresult = count.most_common(size) #most_common() : 매개변수 개수만큼 등수 추출
             result.append(lineresult)
         return result
-
-
-
-    def PrintValue(self):
-        for i in range(0,len(self.keywordList)):
-            if self.valueList[i] >0.4:
-                print(self.keywordList[i][0],'긍정 키워드입니다.',self.valueList[i])
-            elif self.valueList[i] >= 0.30103:
-                print(self.keywordList[i][0],'중립 키워드입니다.',self.valueList[i])
-            else:
-                print(self.keywordList[i][0],'부정 키워드입니다.',self.valueList[i])

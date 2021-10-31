@@ -3,12 +3,10 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 import json
-import os
 
 stopwords = ['의','가','이','은','들','는','좀','잘','걍','과','도','를','으로','자','에','와','한','하다','을']
 okt=Okt()
 
-print(os.getcwd())
 max_len = 30
 max_words = 10000
 
@@ -44,9 +42,4 @@ def sentiment_predict(new_sentence):
   encoded = tokenizer.texts_to_sequences([new_sentence]) # 정수 인코딩
   pad_new = pad_sequences(encoded, maxlen = max_len) # 패딩
   score = float(loaded_model.predict(pad_new)) # 예측
-  if(score > 0.5):
-    #print("{:.2f}% 확률로 긍정 리뷰입니다.\n".format(score * 100))
-    return score
-  else:
-    #print("{:.2f}% 확률로 부정 리뷰입니다.\n".format((1 - score) * 100))
-    return score
+  return score
