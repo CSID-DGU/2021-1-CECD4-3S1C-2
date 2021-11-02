@@ -57,7 +57,7 @@ class KeywordDB(DB):
 
     
     def FetchData(self):
-        sql="SELECT contents FROM comments WHERE news_id=2" 
+        sql="SELECT contents FROM comments" 
         self.cursor.execute(sql)
         self.db.commit()
         temp=self.cursor.fetchall()
@@ -87,7 +87,7 @@ class RelDB(DB):
                 sql="REPLACE INTO devrelkeywords (content, mentions, keyword) values (%s, %s, %s)"
                 self.cursor.execute(sql, tuple)
                 self.db.commit()
-                
+
         sql="DELETE FROM relkeywords"
         self.cursor.execute(sql)
         self.db.commit()
